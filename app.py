@@ -1,21 +1,21 @@
 from flask import Flask, request, jsonify
-from transformers import pipeline
+import requests
 
 app = Flask(__name__)
-
-# Load the Hugging Face model
-model = pipeline("text-generation")
 
 @app.route("/generate_text", methods=["POST"])
 def generate_text():
     # Get the user input from the request
     user_input = request.json["user_input"]
 
-    # Use the Hugging Face model to generate text
-    generated_text = model(user_input, max_length=100)
+    # Use the Hugging Face API to generate text
+    api_url = "https://api-inference.huggingface.co/models/t5-base"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+    data = {"inputs": user_input, "options": {"max_length": 100}}
+    response = requests.post(api_url, headers=headers, json=data)
 
     # Return the generated text as a JSON response
-    return jsonify({"generated_text": generated_text})
+    return jsonify({"generated_text": response.json()["generated_text"]})
 
 if __name__ == "__main__":
     app.run(debug=True)
